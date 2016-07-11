@@ -16,6 +16,7 @@ from mysql.connector.connection import MySQLConnection
 from _sqlite3 import DatabaseError, ProgrammingError
 import csv
 from string import Template
+import collections
 
 #generic sql table maker
 def makeTable(tName,cols):
@@ -70,14 +71,15 @@ def tableFromCSV(csvName,cats,catTypes,tableName):
         conn.commit()
 
 #sends queries, outputs results
-def pullAll(tableName,constraint,op='print'):
+def pullAll(tableName,getCol,constraint,op='none'):
     '''
     Looks at table tableName and selects/prints all the data subject to constraint (ex.: col1 > 2)
+    Outputs printing or csv writing and returns the list of constrained outputs
     '''
     conn = mysql.connector.connect(host='localhost',database='my_sql',user='root',password='recordsaredope')
     cursor = conn.cursor()
-    querytype = Template("SELECT * FROM $t WHERE $c")
-    query = querytype.substitute(t = tableName,c = constraint)
+    querytype = Template("SELECT $g FROM $t WHERE $c")
+    query = querytype.substitute(g = getCol,t = tableName,c = constraint)
     cursor.execute(query)
     rows = cursor.fetchall()
     if op == 'print':
@@ -90,17 +92,21 @@ def pullAll(tableName,constraint,op='print'):
         for row  in rows:
             x.writerow(row)
     else:
-        raise NameError('What kind of output? (print, csv)')
+        pass
+    return rows
 
-#pullAll('product_class','product_department = "Dairy"')
+#pullAll('product_class', 'product_category', 'product_department = "Frozen Foods"', op='print')    
 '''
+tableFromCSV('raw_data/product.csv',\
+             ['product_class_id','product_id','brand_name',\
+              'product_name'],\
+             ['int(3)','int(4)','varchar(50)',\
+              'varchar(50)'],'product')
 tableFromCSV('raw_data/product_class.csv',\
              ['product_class_id','product_subcategory','product_category',\
               'product_department', 'product_family'],\
              ['int(3)','varchar(50)','varchar(50)',\
               'varchar(50)','varchar(50)'],'product_class')
-'''
-'''
 tableFromCSV('raw_data/transactions.csv',\
              ['product_id','customer_id','store_id','promotion_id',\
               'month_of_year', 'quarter','the_year','store_sales',\
