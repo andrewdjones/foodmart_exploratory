@@ -95,7 +95,7 @@ def pullAll(tableName,getCol,constraint,op='none'):
         pass
     return rows
 
-#pullAll('product_class', 'product_category', 'product_department = "Frozen Foods"', op='print')    
+
 '''
 tableFromCSV('raw_data/product.csv',\
              ['product_class_id','product_id','brand_name',\
@@ -107,11 +107,11 @@ tableFromCSV('raw_data/product_class.csv',\
               'product_department', 'product_family'],\
              ['int(3)','varchar(50)','varchar(50)',\
               'varchar(50)','varchar(50)'],'product_class')
-tableFromCSV('raw_data/transactions.csv',\
+tableFromCSV('raw_data/transactions_clean.csv',\
              ['product_id','customer_id','store_id','promotion_id',\
               'month_of_year', 'quarter','the_year','store_sales',\
               'store_cost','unit_sales'],\
              ['int(4)','int(5)','int(5)','int(4)',\
               'int(2)','varchar(50)','int(4)','decimal(10,4)',\
-              'decimal(10,4)','int(5)'],'transactions')
+              'decimal(10,4)','int(5)'],'transactions_rev')
 '''
