@@ -18,7 +18,6 @@ import csv
 from string import Template
 import collections
 
-#generic sql table maker
 def makeTable(tName,cols):
     '''
     Makes simple sql table named tName
@@ -36,11 +35,10 @@ def makeTable(tName,cols):
     cursor.close()
     conn.close()
 
-#builds table from csv    
 def tableFromCSV(csvName,cats,catTypes,tableName):
     '''
-    Takes a csv full of data columns
-    Extracts columns corresponding to cats (of data type catTypes)
+    Takes a csv (csvName) full of data columns
+    Extracts columns corresponding to list cats (of data type list catTypes)
     Sticks result in an sql table named tableName
     '''
       
@@ -70,11 +68,11 @@ def tableFromCSV(csvName,cats,catTypes,tableName):
         cursor.execute(query,tuple(args))
         conn.commit()
 
-#sends queries, outputs results
 def pullAll(tableName,getCol,constraint,op='none'):
     '''
-    Looks at table tableName and selects/prints all the data subject to constraint (ex.: col1 > 2)
-    Outputs printing or csv writing and returns the list of constrained outputs
+    Looks at table tableName and selects/prints all the data subject to constraint
+    Outputs printing (op = 'print') or csv writing (op = 'csv')
+    and returns the list of constrained outputs
     '''
     conn = mysql.connector.connect(host='localhost',database='my_sql',user='root',password='recordsaredope')
     cursor = conn.cursor()
@@ -95,8 +93,12 @@ def pullAll(tableName,getCol,constraint,op='none'):
         pass
     return rows
 
-
 '''
+tableFromCSV('raw_data/promotion_clean.csv',\
+             ['promotion_id','promotion_district_id','promotion_name',\
+              'media_type','cost'],\
+             ['int(4)','int(3)','varchar(50)',\
+              'varchar(50)','int(5)'],'promotion')
 tableFromCSV('raw_data/product.csv',\
              ['product_class_id','product_id','brand_name',\
               'product_name'],\

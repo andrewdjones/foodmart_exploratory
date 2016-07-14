@@ -1,10 +1,11 @@
 ########################################
 #Code base for Foodmart recommendations
-#csv datasets from https://sites.google.com/a/dlpage.phi-integration.com/pentaho/mondrian/mysql-foodmart-database/foodmart_mysql.tar.gz
+#csv datasets from https://sites.google.com/a/
+#dlpage.phi-integration.com/pentaho/mondrian/mysql-foodmart-database/foodmart_mysql.tar.gz
 #
-#This python file constructs statistical visualizations for product data
-#both for categories of product and brands
-#based on networkx graphs
+#This python file constructs networkx/graphviz visualizations for hierarchical data
+#Automated graph drawing is hard, so be gentle
+#Captures the complexity of the hierarchy (multiple parenthood)
 #
 #Andrew Jones
 #andrew.d.jones@yale.edu
@@ -15,20 +16,19 @@ import networkx as nx
 from product_cats_brands import *
 import matplotlib.pyplot as plt
 
+
 def simpleShell():
     '''
     Spits out a messy but accurate graph of category membership
+    Nodes are categories, departments, and families
+    Edges are 'is a parent/child of' relations (NOT one-to-one)
     '''
     #build counter of average revenue per quarter, hashed by product_category
-    catRev = revByGroup('category')
-    print catRev
-    total_rev = sum(catRev.values())
+    catRev = revByGroup('product_category')
     #rev by department
-    depRev = revByGroup('department')
-    print depRev
+    depRev = revByGroup('product_department')
     #rev by family
-    famRev = revByGroup('family')
-    print famRev
+    famRev = revByGroup('product_family')
     
     #get the product_category membership data (department and family)
     product_paths = productCategoryLookups()
@@ -50,35 +50,40 @@ def simpleShell():
         G.add_edge(memb[0],memb[1])
         #department - family
         G.add_edge(memb[1],memb[2])
+        
     #shell sorting and coloring
     shells = [[],[],[]]
     cols = []
     sizes = []
-    for j in fam_set:
+    for j in famRev:
         shells[0].append(j)
-        cols.append('b')
-        sizes.append(famRev[j])
-    for j in dep_set:
+        cols.append('#5dade2')#blueish
+        sizes.append(famRev[j][0])
+    for j in depRev:
         shells[1].append(j)
-        cols.append('y')
-        sizes.append(depRev[j])
-    for j in cat_set:
+        cols.append('#f7dc6f')#yellowish
+        sizes.append(depRev[j][0])
+    for j in catRev:
         shells[2].append(j)
-        cols.append('r')
-        sizes.append(catRev[j])
+        cols.append('#ec7063')#reddish
+        sizes.append(catRev[j][0])
+    #normalization so sizes display reasonably (but proportionally)
     sizes = [round(x/100) for x in sizes]
-    print(sizes)
+    #print(sizes)
     
     #shell positions
+    #alternate node position options to play around with
     #p0 = nx.shell_layout(G,nlist=shells)
-    #p1 = nx.fruchterman_reingold_layout(G,pos = p0)
+    #p0 = nx.fruchterman_reingold_layout(G,pos = p0)
+    #reasonably intuitive node positions
     p0 = nx.nx_pydot.graphviz_layout(G,prog='sfdp')
     #draw and show
-    nx.draw(G,pos=p0,width=1, nodelist = shells[0]+shells[1]+shells[2], node_size = sizes, node_color = cols,with_labels = True)
+    nx.draw(G,pos=p0,width=1, nodelist = shells[0]+shells[1]+shells[2],\
+            node_size = sizes, node_color = cols, scale = 6,\
+            font_size = 12, with_labels = False)
+    #put the labels a little above the nodes themselves
+    nx.draw_networkx_labels(G,pos={k:(v[0],v[1]+10) for k,v in p0.iteritems()})
+    
     plt.show()
     
 simpleShell()
-    
-
-
-
